@@ -16,6 +16,7 @@ public class Snake {
 	int x;
 	int y;
 	int side = 10;
+	int length = 0;
 	int direction = RIGHT;
 	Snake next;
 
