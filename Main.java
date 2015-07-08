@@ -9,14 +9,22 @@ import apcs.Window;
 
 public class Main {
 	
+	// create food object
 	static Food f;
+	// create array of snake objects
 	static Snake[] snakes = new Snake[8];
+	// create an array of longs that store the x position of snakes
 	static long[] snakex = new long[8];
+	// create an array of longs that store the y position of snakes
 	static long[] snakey = new long[8];
 	static Events[] eventsx = new Events[8];
 	static Events[] eventsy = new Events[8];
 	static Events foodx = new Events();
 	static Events foody = new Events();
+	static Events eventScore = new Events();
+	static Events eventPlayer = new Events();
+	static int highscore;
+	static int highplayer;
 	
 	public static void main (String[] args) {
 		Window.size(800, 600);
@@ -32,6 +40,8 @@ public class Main {
 		server.child("foody").setValue(f.y);
 		server.child("foodx").addValueEventListener(foodx);
 		server.child("foody").addValueEventListener(foody);
+		server.child("highscore").addValueEventListener(eventScore);
+		server.child("highplayer").addValueEventListener(eventPlayer);
 		
 
 		for (int i = 0; i < snakes.length; i++) {
@@ -44,13 +54,10 @@ public class Main {
 		
 		while (true) {
 			Window.out.background("black");
-			for (int i = 0; i < Window.width() + 2; i += 11) {
-				for (int j = 0; j < Window.width() + 1; j += 11) {
-					Window.out.color(30,30,30);
-					Window.out.square(i - 2, j - 3, 10);
-				}
-
-			}
+			Window.out.color("white");
+			Window.out.font("monospaced", 25);
+			Window.out.print("High Score: " + highscore, 50, 50);
+			Window.out.print("High Player: " + highplayer, 50, 70);
 			if (!Events.update) {
 				
 				f.x = (int) foodx.data;
@@ -59,6 +66,8 @@ public class Main {
 					snakes[i].x = (int) eventsx[i].data;
 					snakes[i].y = (int) eventsy[i].data;
 				}
+				highscore = (int) eventScore.data;
+				highplayer = (int) eventPlayer.data;
 			}
 			
 			f.draw();
@@ -74,9 +83,16 @@ public class Main {
 				}
 				if (snakes[i].checkFood(f)) {
 					snakes[i].grow();
+					snakes[i].length++;
 					f.reset();
 					server.child("foodx").setValue(f.x);
 					server.child("foody").setValue(f.y);
+					if (highscore < snakes[i].length) {
+						highscore = snakes[i].length;
+						server.child("highscore").setValue(highscore);
+						server.child("highplayer").setValue(i);
+					}
+					
 				}
 				if (snakes[i].checkItself(snakes[i])) {
 					snakes[i] = new Snake();
